@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class='container home-sequence'>
+  <div class='home-box'>
+    <div class='well'>
+      <h3>Campaign For: {{ campaign.username}} {% if not job %}<div class='pull-right'><a href='/update/{{ campaign.id }}'><button class='btn btn-danger'>Activate Campaign</button></a>{% endif %}</h3>
+      <p>Next Run Time: {{ job.next_run_time }}</p>
+      <table class="table table-striped table-hover ">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Total Likes</th>
+            <th>Total Followers</th>
+            <th>New Followers</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for statistic in campaign.statistics %}
+        <tr>
+          <td>1</td>
+          <td>{{ statistic.date }}</td>
+          <td>{{ statistic.total_likes }}</td>
+          <td>{{ statistic.total_followers }}</td>
+          <td>-</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

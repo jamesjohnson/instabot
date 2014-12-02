@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class='container home-sequence'>
+  <div class='home-box'>
+    <div class='well'>
+      <h3>Hello {{ current_user.username }}: {{ current_user.id }}</h3>
+      {% if current_user.password %}
+      <form action='' method='POST'>
+        <div class='form-group'>
+          <div class='col-lg-10'>
+            <input type='text' class='form-control' name='username'>
+          </div>
+          <button type="submit" class="btn btn-primary"><i class="fa fa-instagram fa-lg"></i> Start New Campaign</button>
+        </div>
+      </form>
+      <div class='main'>
+        <ul>
+          {% for campaign in campaigns %}
+          <li><a href='/campaign/{{ campaign.id }}'>{{ campaign.username }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% else %}
+      <form action='/password' method='POST'>
+        <div class='form-group'>
+          <div class='col-lg-10'>
+            <input type='text' class='form-control' name='password'>
+          </div>
+          <button type="submit" class="btn btn-primary"><i class="fa fa-instagram fa-lg"></i> Add Instagram Password</button>
+        </div>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

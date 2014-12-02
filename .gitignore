@@ -1,4 +1,6 @@
 lib/
+share/
+*.pyc
 bin/
 inlcude/
 include/python2.7

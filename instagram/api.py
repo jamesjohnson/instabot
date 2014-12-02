@@ -3,6 +3,8 @@ import requests
 from instagram.client import InstagramAPI
 from models import Session, ScrapeRequest
 
+import dj_database_url
+
 CODE = "fd9c0acc616f41c4801eed3fa7c7ca14"
 
 """
@@ -13,6 +15,7 @@ curl \-F 'client_id=393749080807444a975e11c6060a58be' \
     -F 'code=fd9c0acc616f41c4801eed3fa7c7ca14' \https://api.instagram.com/oauth/access_token
 """
 
+DATABASES['default'] =  dj_database_url.config()
 
 import hmac
 from hashlib import sha256

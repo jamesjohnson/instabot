@@ -32,7 +32,7 @@ javascript = """
             """
 
 
-def crawl(profile='merrittbeck'):
+def crawl(profile):
     driver.get("https://instagram.com/%s" % profile)
     driver.implicitly_wait(10)
     results = driver.execute_script(javascript)

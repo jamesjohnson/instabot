@@ -7,6 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
 
 
 from models import Session, Prospect
@@ -26,6 +27,7 @@ class InstagramBot(object):
         self.failed = 0
         self.prospects_completed = 0
         self.start_time = None
+        self.successful_prospects = []
 
     def _login(self):
         self.driver.get("https://instagram.com/accounts/login")
@@ -43,6 +45,20 @@ class InstagramBot(object):
         self.is_logged_in = True
         return True
 
+    def _find_links(self, username):
+        self.driver.get("https://instagram.com/")
+        time.sleep(2)
+        self.driver.get("https://instagram.com/%s" % username)
+        return self.driver.find_elements_by_xpath("//ul[@class='photo-feed']/li/div/a")
+
+    def _print_time(self):
+        current_time = datetime.timedelta(seconds=time.time() - \
+                self.start_time)
+        print "Time Elapsed: {0} {1}: liked {2}: failed\n".format(\
+                    current_time,
+                    self.completed,\
+                    self.failed)
+
     def like(self):
         self.start_time = time.time()
         if not self.is_logged_in:
@@ -51,12 +67,7 @@ class InstagramBot(object):
         for prospect in self.prospects:
             prospect.done = True
             session.commit()
-            self.driver.get("https://instagram.com/")
-            time.sleep(2)
-            self.driver.get("https://instagram.com/%s" % prospect.username)
-            #We want to randomly choose between 2-4 pictures to like in variable
-            #positions
-            links = self.driver.find_elements_by_xpath("//ul[@class='photo-feed']/li/div/a")
+            links = self._find_links(prospect.prospect.username)
             if len(links) > 1:
                 try:
                     link = links[0]
@@ -73,17 +84,39 @@ class InstagramBot(object):
                         self.failed += 1
                         print "like failed"
                         time.sleep(60)
-                    current_time = datetime.timedelta(seconds=time.time() - \
-                            self.start_time)
-                    print "Time Elapsed: {0} {1}: liked {2}: failed\n".format(\
-                                current_time,
-                                self.completed,\
-                                self.failed)
+                    self._print_time()
                 except Exception, e:
                     self.failed += 1
                     print e
         self.driver.quit()
         return True
+
+    def comment(self, text):
+        self.start_time = time.time()
+        if not self.is_logged_in:
+            self._login()
+            time.sleep(10)
+        for prospect in self.prospects:
+            prospect.done = True
+            session.commit()
+            links = self._find_links(prospect.prospect.username)
+            if len(links) > 1:
+                try:
+                    link = links[0]
+                    link.click()
+                    time.sleep(5)
+                    element_to_comment = self.driver.find_element_by_xpath("//input[@class='fbInput']")
+                    element_to_comment.send_keys(text)
+                    element_to_comment.send_keys(Keys.RETURN)
+                    self._print_time()
+                    self.completed += 1
+                    self.successful_prospects.append(prospect)
+                    time.sleep(15)
+                except Exception, e:
+                    self.failed += 1
+                    print e
+        self.driver.quit()
+        return self.successful_prospects
 
 
 def run(username, password):

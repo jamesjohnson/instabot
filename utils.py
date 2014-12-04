@@ -11,7 +11,8 @@ from redis import Redis
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.redis import RedisJobStore
 
-from models import Session, User, Campaign, Prospect, ProspectProfile
+from models import Session, User, Campaign, Prospect, ProspectProfile, \
+ProspectComment
 from old_insta import InstagramBot
 
 from settings import INSTAGRAM_KEY, INSTAGRAM_SECRET, INSTAGRAM_REDIRECT
@@ -45,12 +46,13 @@ def create_user(user, campaign):
                     instagram_id=user.id,
                     )
             session.add(prospect)
+            session.commit()
         prospect_profile = ProspectProfile(
-                campaign=campaign.id,
-                prospect=prospect.id,
+                campaign=campaign,
+                prospect=prospect,
                 done=False,
                 followed_back=False)
-        session.add(prospect)
+        session.add(prospect_profile)
         session.commit()
     except Exception, e:
         print (e, "111")
@@ -90,6 +92,7 @@ def downloads(campaign, api):
             except Exception, e:
                 print (e, "131")
     campaign.next_items = next_items
+    session.add(campaign)
     session.commit()
     print "{0} users created".format(created_user_count)
     return True
@@ -97,7 +100,8 @@ def downloads(campaign, api):
 def update_likes(campaign, api):
     user = session.query(User).filter_by(id=campaign.user).first()
     downloaded_results = downloads(campaign, api)
-    prospects = Prospect.get_unliked_requests(session, campaign.id, 65)
+    prospects = (prospect for prospect \
+            in ProspectProfile.get_unliked_requests(session, campaign.id, 60))
     ig = InstagramBot(
             username=user.username,
             password=user.password,
@@ -105,6 +109,29 @@ def update_likes(campaign, api):
     result = ig.like()
     campaign.generate_stats(session, total_likes=ig.completed)
     return True
+
+def update_comments(campaign_id, api):
+    logging.basicConfig()
+    campaign = session.query(Campaign).get(campaign_id)
+    user = session.query(User).get(campaign.user.id)
+    prospects = [prospect for prospect in \
+            session.query(ProspectProfile).filter_by(campaign=campaign)]
+    ig = InstagramBot(
+            username=user.username,
+            password=user.password,
+            prospects=prospects)
+    results = ig.comment(text=campaign.comment)
+    for prospect in results:
+        media = user.insta_client.user_recent_media()[0][0]
+        prospect_comment=ProspectComment(
+                prospect_profile=prospect,
+                created=True,
+                media_id=media.id
+                )
+        session.add(prospect_comment)
+        session.commit()
+    return True
+
 
 def pause_job(job_id):
     scheduler = get_scheduler()
@@ -116,7 +143,8 @@ def pause_job(job_id):
 def start_like_scheduler(campaign, api):
     logging.basicConfig()
     scheduler = get_scheduler()
-    job = scheduler.add_job(update_likes, 'cron', minute=51, args=(campaign,api,))
+    start = datetime.datetime.today().minute + 1
+    job = scheduler.add_job(update_likes, 'cron', minute=start, args=(campaign,api,))
     #scheduler.add_job(pause_job, 'cron', minute=4, hour="4,8,12,16", args=(job.id,))
     scheduler.start()
     campaign.job_id=job.id

@@ -6,7 +6,7 @@ import random
 import code
 
 from sqlalchemy import create_engine, Column, Integer, Boolean, String, \
-BigInteger, ForeignKey, Date
+BigInteger, ForeignKey, Date, DateTime
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -28,6 +28,10 @@ class User(Base):
     followers = Column(BigInteger)
     campaigns = relationship("Campaign")
     password = Column(String)
+
+    @property
+    def insta_client(self):
+        return instagram.client.InstagramAPI(access_token=self.access_token)
 
     def is_authenticated(self):
         return True
@@ -58,9 +62,12 @@ class Campaign(Base):
     instagram_id = Column(Integer)
     comment = Column(String)
     active = Column(String)
-    user = Column(Integer, ForeignKey("user.id"))
     next_items = Column(String)
     job_id = Column(String)
+
+    user_id = Column(Integer, ForeignKey("user.id"))
+
+    user = relationship('User', foreign_keys='Campaign.user_id')
     statistics = relationship("Statistic")
 
 
@@ -109,38 +116,62 @@ class ProspectProfile(Base):
     __tablename__ = 'prospect_profile'
 
     id = Column(Integer, primary_key=True)
-    prospect = Column(Integer, ForeignKey("prospect.id"))
     done = Column(Boolean, default=False)
     followed_back = Column(Boolean, default=False)
-    campaign = Column(Integer, ForeignKey("campaign.id"))
 
-    def like_photos(self, session, api, number):
-        if self.media_ids:
-            media_ids = self.media_ids.replace("{", "").replace("}", "").split(",")
-            photos = [random.choice(media_ids) for i in range(number)]
-            for photo in photos:
-                try:
-                    api.like_media(photo)
-                    logger.debug('Liked Image: {} for user {}'.format(id,\
-                        self.username))
-                except Exception, e:
-                    print (e)
-            self.done = True
-            session.add(self)
-            session.commit()
-        return []
+    prospect_id = Column(Integer, ForeignKey("prospect.id"))
+    campaign_id = Column(Integer, ForeignKey("campaign.id"))
+
+    prospect = relationship('Prospect', foreign_keys='ProspectProfile.prospect_id')
+    campaign = relationship('Campaign', foreign_keys='ProspectProfile.campaign_id')
+    prospect_comment = relationship("ProspectComment")
 
     @classmethod
     def get_unliked_requests(cls, session, campaign_id, number):
         return session.query(ProspectProfile).filter_by(\
                 done=False,\
-                campaign=campaign_id
+                campaign=campaign_id\
                 ).limit(number)
 
     def __repr__(self):
         return '<ProspectProfile id={0} done={1} username={2}>'.format(
                 self.id,
                 self.done,
+                self.username
+                )
+
+
+class ProspectComment(Base):
+    __tablename__ = "prospect_comment"
+
+    id = Column(Integer, primary_key=True)
+    created = Column(Boolean, default=False)
+    reply = Column(String)
+    reply_date = Column(DateTime)
+    media_id = Column(String)
+    prospect_profile_id = Column(Integer, ForeignKey("prospect_profile.id"))
+    prospect_profile = relationship('ProspectProfile',
+            foreign_keys='ProspectComment.prospect_profile_id')
+
+    def check_reply(self, session, api):
+        media_id = self.media_id
+        username = self.prospect_profile.campaign.user.username
+        api = instagram.client.InstagramAPI(access_token=user.access_token)
+        comments = api.media_comments(media_id)
+        for comment in comments:
+            if username in comment.text:
+                self.reply=comment.text
+                self.reply_date=comment.created_at
+                session.commit()
+                return True
+        return False
+
+
+
+    def __repr__(self):
+        return '<ProspectProfile id={0} done={1} username={2}>'.format(
+                self.id,
+                self.d,
                 self.username
                 )
 

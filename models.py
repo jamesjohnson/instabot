@@ -91,7 +91,7 @@ class Campaign(Base):
     def __repr__(self):
         return '<Campaign id={0} user_id={1}>'.format(
                 self.id,
-                self.user
+                self.user.id
                 )
 
 
@@ -139,7 +139,7 @@ class ProspectProfile(Base):
         return '<ProspectProfile id={0} done={1} username={2}>'.format(
                 self.id,
                 self.done,
-                self.username
+                self.prospect.username
                 )
 
 

@@ -48,8 +48,8 @@ def create_user(user, campaign):
             session.add(prospect)
             session.commit()
         prospect_profile = ProspectProfile(
-                campaign=campaign,
-                prospect=prospect,
+                campaign_id=campaign.id,
+                prospect_id=prospect.id,
                 done=False,
                 followed_back=False)
         session.add(prospect_profile)
@@ -92,15 +92,17 @@ def downloads(campaign, api):
             except Exception, e:
                 print (e, "131")
     campaign.next_items = next_items
-    session.add(campaign)
     session.commit()
+    if session.query(Campaign).get(campaign.id).next_items != next_items:
+        campaign = session.query(Campaign).get(campaign.id)
+        campaign.next_items = next_items
+        session.add(campaign)
+        session.commit()
     print "{0} users created".format(created_user_count)
     return True
 
 def update_likes(campaign, api):
     user = session.query(User).get(campaign.user.id)
-    import pdb
-    pdb.set_trace()
     downloaded_results = downloads(campaign, api)
     prospects = (prospect for prospect \
             in ProspectProfile.get_unliked_requests(session, campaign.id, 60))
@@ -155,9 +157,7 @@ def start_like_scheduler(campaign, api):
 
 def update_and_download(campaign_id):
     campaign = session.query(Campaign).filter_by(id=campaign_id).first()
-    user = session.query(User).get(campaign.user.id)
-    access_token = user.access_token
-    api = instagram.client.InstagramAPI(access_token=access_token)#,
+    api = instagram.client.InstagramAPI(access_token=campaign.user.access_token)#,
                                         #client_ips="72.69.141.254",
                                         #client_secret=INSTAGRAM_SECRET)
     return start_like_scheduler(campaign, api)

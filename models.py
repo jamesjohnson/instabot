@@ -1,4 +1,5 @@
 import argparse
+import os
 import instagram
 import datetime
 import logging
@@ -202,10 +203,13 @@ class Statistic(Base):
                 )
 
 
-engine_url = URL(
-        settings.DB_CONNECTION['drivername'],
-        **settings.DB_CONNECTION['kwargs']
-        )
+if os.getenv("DB_URL"):
+    engine_url = os.getenv("DB_URL")
+else:
+    engine_url = URL(
+            settings.DB_CONNECTION['drivername'],
+            **settings.DB_CONNECTION['kwargs']
+            )
 
 engine = create_engine(engine_url)
 

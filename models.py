@@ -123,14 +123,16 @@ class ProspectProfile(Base):
     campaign_id = Column(Integer, ForeignKey("campaign.id"))
 
     prospect = relationship('Prospect', foreign_keys='ProspectProfile.prospect_id')
-    campaign = relationship('Campaign', foreign_keys='ProspectProfile.campaign_id')
+    campaign = relationship('Campaign',
+            foreign_keys='ProspectProfile.campaign_id',
+            backref="prospect_profiles")
     prospect_comment = relationship("ProspectComment")
 
     @classmethod
     def get_unliked_requests(cls, session, campaign_id, number):
         return session.query(ProspectProfile).filter_by(\
                 done=False,\
-                campaign=campaign_id\
+                campaign_id=campaign_id\
                 ).limit(number)
 
     def __repr__(self):

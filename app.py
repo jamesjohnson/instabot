@@ -168,7 +168,11 @@ def campaign(campaign_id):
     campaign = session.query(Campaign).get(campaign_id)
     scheduler = get_scheduler()
     job = scheduler.get_job(campaign.job_id)
-    return render_template("campaign.html", campaign=campaign, job=job)
+    if campaign.comment:
+        template = "comments/campaign.html"
+    else:
+        template = "campaign.html"
+    return render_template(template, campaign=campaign, job=job)
 
 @app.route("/update/<int:campaign_id>")
 def turn_on(campaign_id):

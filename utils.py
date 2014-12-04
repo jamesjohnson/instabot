@@ -98,7 +98,9 @@ def downloads(campaign, api):
     return True
 
 def update_likes(campaign, api):
-    user = session.query(User).filter_by(id=campaign.user).first()
+    user = session.query(User).get(campaign.user.id)
+    import pdb
+    pdb.set_trace()
     downloaded_results = downloads(campaign, api)
     prospects = (prospect for prospect \
             in ProspectProfile.get_unliked_requests(session, campaign.id, 60))
@@ -153,7 +155,7 @@ def start_like_scheduler(campaign, api):
 
 def update_and_download(campaign_id):
     campaign = session.query(Campaign).filter_by(id=campaign_id).first()
-    user = session.query(User).filter_by(id=campaign.user).first()
+    user = session.query(User).get(campaign.user.id)
     access_token = user.access_token
     api = instagram.client.InstagramAPI(access_token=access_token)#,
                                         #client_ips="72.69.141.254",

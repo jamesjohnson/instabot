@@ -1,4 +1,5 @@
 lib/
+vars.sh
 share/
 *.pyc
 bin/

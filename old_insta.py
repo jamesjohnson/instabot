@@ -12,7 +12,7 @@ from selenium.webdriver.common.keys import Keys
 from pyvirtualdisplay import Display
 
 
-from models import Session, Prospect
+from models import Session, Prospect, ProspectProfile
 
 session = Session()
 
@@ -23,7 +23,6 @@ class InstagramBot(object):
         self.display.start()
         time.sleep(2)
         self.driver = webdriver.Firefox()
-        self.session = Session()
         self.is_logged_in = False
         self.username = kwargs.get("username")
         self.password = kwargs.get("password")
@@ -69,7 +68,8 @@ class InstagramBot(object):
         if not self.is_logged_in:
             self._login()
             time.sleep(10)
-        for prospect in self.prospects:
+        for prospect_id in self.prospects:
+            prospect = session.query(ProspectProfile).get(prospect_id)
             prospect.done = True
             session.add(prospect)
             session.commit()
@@ -102,7 +102,8 @@ class InstagramBot(object):
         if not self.is_logged_in:
             self._login()
             time.sleep(10)
-        for prospect in self.prospects:
+        for prospect_id in self.prospects:
+            prospect = session.query(ProspectProfile).get(prospect_id)
             prospect.done = True
             session.add(prospect)
             session.commit()

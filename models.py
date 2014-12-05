@@ -74,7 +74,7 @@ class Campaign(Base):
 
     def generate_stats(self, session, total_likes=0):
         today = datetime.date.today()
-        user = campaign.user
+        user = self.user
         statistic = session.query(Statistic).filter_by(campaign=self.id, \
                 date=today).first()
         if not statistic:

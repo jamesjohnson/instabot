@@ -19,7 +19,9 @@ session = Session()
 class InstagramBot(object):
 
     def __init__(self, *args, **kwargs):
-        xephyr=Display(visible=1, size=(320, 240)).start()
+        self.display = Display(visible=0, size=(1024, 768))
+        self.display.start()
+        time.sleep(2)
         self.driver = webdriver.Firefox()
         self.session = Session()
         self.is_logged_in = False
@@ -119,6 +121,7 @@ class InstagramBot(object):
                     self.failed += 1
                     print e
         self.driver.quit()
+        self.display.close()
         return self.successful_prospects
 
 

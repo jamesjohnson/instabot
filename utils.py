@@ -101,7 +101,8 @@ def downloads(campaign, api):
     print "{0} users created".format(created_user_count)
     return True
 
-def update_likes(campaign, api):
+def update_likes(campaign_id, api):
+    campaign = session.query(Campaign).get(campaign_id)
     user = session.query(User).get(campaign.user.id)
     downloaded_results = downloads(campaign, api)
     prospects = (prospect for prospect \
@@ -148,7 +149,8 @@ def start_like_scheduler(campaign, api):
     logging.basicConfig()
     scheduler = get_scheduler()
     start = datetime.datetime.today().minute + 1
-    job = scheduler.add_job(update_likes, 'cron', minute=start, misfire_grace_time=None, args=(campaign,api,))
+    job = scheduler.add_job(update_likes, 'cron', minute=start, \
+            misfire_grace_time=None, args=(campaign.id,api,))
     #scheduler.add_job(pause_job, 'cron', minute=4, hour="4,8,12,16", args=(job.id,))
     scheduler.start()
     campaign.job_id=job.id

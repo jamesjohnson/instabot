@@ -105,7 +105,7 @@ def update_likes(campaign_id, api):
     campaign = session.query(Campaign).get(campaign_id)
     user = session.query(User).get(campaign.user.id)
     downloaded_results = downloads(campaign, api)
-    prospects = (prospect for prospect \
+    prospects = (prospect.id for prospect \
             in ProspectProfile.get_unliked_requests(session, campaign.id, 60))
     ig = InstagramBot(
             username=user.username,
@@ -119,8 +119,8 @@ def update_comments(campaign_id, api):
     logging.basicConfig()
     campaign = session.query(Campaign).get(campaign_id)
     user = session.query(User).get(campaign.user.id)
-    prospects = [prospect for prospect in \
-            session.query(ProspectProfile).filter_by(campaign=campaign)]
+    prospects = (prospect.id for prospect in \
+            session.query(ProspectProfile).filter_by(campaign=campaign))
     ig = InstagramBot(
             username=user.username,
             password=user.password,

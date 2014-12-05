@@ -148,7 +148,7 @@ def start_like_scheduler(campaign, api):
     logging.basicConfig()
     scheduler = get_scheduler()
     start = datetime.datetime.today().minute + 1
-    job = scheduler.add_job(update_likes, 'cron', minute=start, args=(campaign,api,))
+    job = scheduler.add_job(update_likes, 'cron', minute=start, misfire_grace_time=None, args=(campaign,api,))
     #scheduler.add_job(pause_job, 'cron', minute=4, hour="4,8,12,16", args=(job.id,))
     scheduler.start()
     campaign.job_id=job.id

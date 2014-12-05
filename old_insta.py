@@ -84,7 +84,7 @@ class InstagramBot(object):
                     if "ButtonActive" in element_to_like.get_attribute("class"):
                         self.driver.find_element_by_xpath("//i[@class='igDialogClose']").click()
                         self.completed += 1
-                        time.sleep(15)
+                        time.sleep(20)
                     else:
                         self.failed += 1
                         print "like failed"

@@ -9,6 +9,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
+from pyvirtualdisplay import Display
+
 
 from models import Session, Prospect
 
@@ -17,6 +19,7 @@ session = Session()
 class InstagramBot(object):
 
     def __init__(self, *args, **kwargs):
+        xephyr=Display(visible=1, size=(320, 240)).start()
         self.driver = webdriver.Firefox()
         self.session = Session()
         self.is_logged_in = False

@@ -81,7 +81,8 @@ def instagram_oauth():
         session.commit()
         login_user(new_user)
         return redirect(url_for("home"))
-    except:
+    except Exception, e:
+        print e
         return redirect(url_for("instagram_start"))
 
 @app.route("/home", methods=['GET', 'POST'])

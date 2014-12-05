@@ -203,14 +203,12 @@ class Statistic(Base):
                 )
 
 
-if os.getenv("DB_URL"):
-    engine_url = os.getenv("DB_URL")
-else:
-    engine_url = URL(
-            settings.DB_CONNECTION['drivername'],
-            **settings.DB_CONNECTION['kwargs']
-            )
+engine_url = URL(
+    settings.DB_CONNECTION['drivername'],
+    **settings.DB_CONNECTION['kwargs']
+    )
 
+print engine_url
 engine = create_engine(engine_url)
 
 Session = sessionmaker(bind=engine)

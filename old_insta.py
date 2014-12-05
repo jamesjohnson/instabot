@@ -103,6 +103,7 @@ class InstagramBot(object):
             time.sleep(10)
         for prospect in self.prospects:
             prospect.done = True
+            session.add(prospect)
             session.commit()
             links = self._find_links(prospect.prospect.username)
             if len(links) > 1:

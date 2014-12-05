@@ -6,6 +6,7 @@ from flask import render_template
 from flask import request
 from flask import redirect, url_for
 from flask.ext.login import login_user, LoginManager, logout_user, current_user, fresh_login_required
+from werkzeug.debug import DebuggedApplication
 
 from models import Session, User, Campaign, Prospect, ProspectProfile,\
 ProspectComment
@@ -15,6 +16,7 @@ from settings import INSTAGRAM_KEY, INSTAGRAM_SECRET, INSTAGRAM_REDIRECT
 import instagram
 app = Flask(__name__)
 app.secret_key = 'why would I tell you my secret key?'
+app.debug = True
 login_manager = LoginManager()
 login_manager.init_app(app)
 session = Session()
@@ -177,6 +179,7 @@ def campaign(campaign_id):
 
 @app.route("/update/<int:campaign_id>")
 def turn_on(campaign_id):
+    print "updated"
     campaign = session.query(Campaign).get(campaign_id)
     update_and_download(campaign.id)
     return redirect(url_for("campaign", campaign_id=campaign.id))

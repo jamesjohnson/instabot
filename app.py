@@ -7,7 +7,7 @@ from flask import request
 from flask import redirect, url_for
 from flask.ext.login import login_user, LoginManager, logout_user, current_user, fresh_login_required
 
-from models import Session, User, Campaign, Prospect, ProspectProfile,\
+from models import session, User, Campaign, Prospect, ProspectProfile,\
 ProspectComment
 from utils import update_and_download, get_scheduler, update_comments
 from settings import INSTAGRAM_KEY, INSTAGRAM_SECRET, INSTAGRAM_REDIRECT
@@ -17,7 +17,6 @@ app = Flask(__name__)
 app.secret_key = 'why would I tell you my secret key?'
 login_manager = LoginManager()
 login_manager.init_app(app)
-session = Session()
 
 
 @login_manager.user_loader

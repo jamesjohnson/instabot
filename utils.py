@@ -11,13 +11,12 @@ from redis import Redis
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.redis import RedisJobStore
 
-from models import Session, User, Campaign, Prospect, ProspectProfile, \
+from models import session, User, Campaign, Prospect, ProspectProfile, \
 ProspectComment
 from old_insta import InstagramBot
 
 from settings import INSTAGRAM_KEY, INSTAGRAM_SECRET, INSTAGRAM_REDIRECT
 
-session = Session()
 redis_url = "redis://localhost:6379"
 logger = logging.getLogger('instagram')
 logger.addHandler(logging.StreamHandler())

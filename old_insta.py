@@ -12,9 +12,8 @@ from selenium.webdriver.common.keys import Keys
 from pyvirtualdisplay import Display
 
 
-from models import Session, Prospect, ProspectProfile
+from models import session, Prospect, ProspectProfile
 
-session = Session()
 
 class InstagramBot(object):
 
@@ -93,7 +92,7 @@ class InstagramBot(object):
                     self._print_time()
                 except Exception, e:
                     self.failed += 1
-                    print e
+                    print e, prospect, prospect_id
         self.driver.quit()
         return True
 

@@ -52,6 +52,25 @@ class User(Base):
                 self.username,
                 )
 
+class UserLike(Base):
+    __tablename__ = "user_likes"
+
+    id = Column(Integer, primary_key=True)
+
+    user_id = Column(Integer, ForeignKey("user.id"))
+    user = relationship('User', foreign_keys='UserLike.user_id')
+
+
+    prospect_id = Column(Integer, ForeignKey("prospect.id"))
+    prospect = relationship('Prospect', foreign_keys='UserLike.prospect_id')
+
+    def __repr__(self):
+        return '<UserLike id={0} user_id={1} prospect_id={2}>'.format(
+                self.id,
+                self.user_id,
+                self.prospect_id
+                )
+
 
 class Campaign(Base):
     __tablename__ = "campaign"
@@ -212,6 +231,7 @@ print engine_url
 engine = create_engine(engine_url)
 
 Session = sessionmaker(bind=engine)
+session = Session()
 
 def create():
     Base.metadata.create_all(engine)

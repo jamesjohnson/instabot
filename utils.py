@@ -150,11 +150,13 @@ def start_like_scheduler(campaign, api):
     #scheduler.add_job(pause_job, 'cron', minute=4, hour="4,8,12,16", args=(job.id,))
     scheduler.start()
     campaign.job_id=job.id
+    print "Job ID: {}".format(job.id)
     session.commit()
     return scheduler
 
 def update_and_download(campaign_id):
-    campaign = session.query(Campaign).filter_by(id=campaign_id).first()
+    campaign = session.query(Campaign).get(campaign_id)
+    print "update and download"
     api = instagram.client.InstagramAPI(access_token=campaign.user.access_token)#,
                                         #client_ips="72.69.141.254",
                                         #client_secret=INSTAGRAM_SECRET)

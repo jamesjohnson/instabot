@@ -12,7 +12,7 @@ from selenium.webdriver.common.keys import Keys
 from pyvirtualdisplay import Display
 
 
-from models import session, Prospect, ProspectProfile
+from models import session, Prospect, ProspectProfile, UserLike
 
 
 class InstagramBot(object):
@@ -62,6 +62,11 @@ class InstagramBot(object):
                     self.completed,\
                     self.failed)
 
+    def _get_media_id(self):
+        user_media = self.driver.execute_script("return window._sharedData")
+        return user_media.get('entry_data').get('UserProfile')[0]\
+                .get('userMedia')[0].get('id')
+
     def like(self):
         self.start_time = time.time()
         if not self.is_logged_in:
@@ -70,7 +75,6 @@ class InstagramBot(object):
         for prospect_id in self.prospects:
             prospect = session.query(ProspectProfile).get(prospect_id)
             prospect.done = True
-            session.add(prospect)
             session.commit()
             links = self._find_links(prospect.prospect.username)
             if len(links) > 1:
@@ -84,6 +88,17 @@ class InstagramBot(object):
                     if "ButtonActive" in element_to_like.get_attribute("class"):
                         self.driver.find_element_by_xpath("//i[@class='igDialogClose']").click()
                         self.completed += 1
+                        try:
+                            media_id =self._get_media_id()
+                        except:
+                            media_id = None
+                        print media_id
+                        user = prospect.campaign.user
+                        user_like = UserLike(prospect=prospect.prospect,
+                                user=user,
+                                media_id=media_id)
+                        session.add(user_like)
+                        session.commit()
                         time.sleep(20)
                     else:
                         self.failed += 1
@@ -104,7 +119,6 @@ class InstagramBot(object):
         for prospect_id in self.prospects:
             prospect = session.query(ProspectProfile).get(prospect_id)
             prospect.done = True
-            session.add(prospect)
             session.commit()
             links = self._find_links(prospect.prospect.username)
             if len(links) > 1:

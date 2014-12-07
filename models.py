@@ -64,6 +64,8 @@ class UserLike(Base):
     prospect_id = Column(Integer, ForeignKey("prospect.id"))
     prospect = relationship('Prospect', foreign_keys='UserLike.prospect_id')
 
+    media_id = Column(String)
+
     def __repr__(self):
         return '<UserLike id={0} user_id={1} prospect_id={2}>'.format(
                 self.id,
@@ -187,8 +189,6 @@ class ProspectComment(Base):
                 session.commit()
                 return True
         return False
-
-
 
     def __repr__(self):
         return '<ProspectProfile id={0} done={1} username={2}>'.format(

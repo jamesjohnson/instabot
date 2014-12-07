@@ -93,10 +93,7 @@ def downloads(campaign, api):
     campaign.next_items = next_items
     session.commit()
     if session.query(Campaign).get(campaign.id).next_items != next_items:
-        campaign = session.query(Campaign).get(campaign.id)
-        campaign.next_items = next_items
-        session.add(campaign)
-        session.commit()
+        print "FAIL: next items still causing issues"
     print "{0} users created".format(created_user_count)
     return True
 

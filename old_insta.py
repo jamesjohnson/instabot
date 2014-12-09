@@ -109,6 +109,7 @@ class InstagramBot(object):
                     self.failed += 1
                     print e, prospect, prospect_id
         self.driver.quit()
+        self.display.close()
         return True
 
     def comment(self, text):

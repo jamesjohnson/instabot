@@ -54,6 +54,7 @@ def create_user(user, campaign):
         session.add(prospect_profile)
         session.commit()
     except Exception, e:
+	session.rollback()
         print (e, "111")
 
 def downloads(campaign, api):
@@ -122,6 +123,7 @@ def update_comments(campaign_id, api):
             password=user.password,
             prospects=prospects)
     results = ig.comment(text=campaign.comment)
+    print results, "utils 125"
     for prospect in results:
         media = user.insta_client.user_recent_media()[0][0]
         prospect_comment=ProspectComment(

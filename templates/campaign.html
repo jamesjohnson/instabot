@@ -17,13 +17,13 @@
           </tr>
         </thead>
         <tbody>
-        {% for statistic in campaign.statistics %}
+        {% for statistic in campaign.statistics_desc %}
         <tr>
           <td>1</td>
           <td>{{ statistic.date }}</td>
           <td>{{ statistic.total_likes }}</td>
           <td>{{ statistic.total_followers }}</td>
-          <td>-</td>
+          <td>{{ statistic.new_followers }}</td>
         </tr>
         {% endfor %}
         </tbody>

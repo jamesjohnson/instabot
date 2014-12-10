@@ -93,6 +93,10 @@ class Campaign(Base):
     statistics = relationship("Statistic")
 
 
+    @property
+    def statistics_desc(self):
+        return session.query(Statistic).filter_by(campaign=self.id).order_by(Statistic.date.desc())
+
     def generate_stats(self, session, total_likes=0):
         today = datetime.date.today()
         user = self.user
@@ -213,6 +217,15 @@ class Statistic(Base):
     def new_followers(self):
         today = datetime.datetime.today()
         yesterday = today - datetime.timedelta(days=1)
+	try:
+            statistic = session.query(Statistic).filter_by(
+					date=yesterday.date(),
+                                        campaign=self.campaign).first()
+            return self.total_followers - statistic.total_followers
+        except:
+            return 0
+
+						
 
     def __repr__(self):
         return '<Statistic id={0} date={1} campaign={2}>'.format(

@@ -12,8 +12,9 @@ from selenium.webdriver.common.keys import Keys
 from pyvirtualdisplay import Display
 
 
-from models import session, Prospect, ProspectProfile, UserLike
+from models import Session, Prospect, ProspectProfile, UserLike
 
+session = Session()
 
 class InstagramBot(object):
 

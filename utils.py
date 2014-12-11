@@ -11,7 +11,7 @@ from redis import Redis
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.redis import RedisJobStore
 
-from models import session, User, Campaign, Prospect, ProspectProfile, \
+from models import Session, User, Campaign, Prospect, ProspectProfile, \
 ProspectComment
 from old_insta import InstagramBot
 
@@ -33,9 +33,12 @@ def get_scheduler():
                             password=redis_url_parsed.password
                         )
             }
-    return BackgroundScheduler(jobstores=jobstores)
+    sched = BackgroundScheduler(jobstores=jobstores)
+    if not sched.running:
+        sched.start()
+    return sched
 
-def create_user(user, campaign):
+def create_user(session, user, campaign):
     try:
         prospect = session.query(Prospect).filter_by(\
                 username=user.username).first()
@@ -54,9 +57,10 @@ def create_user(user, campaign):
         session.add(prospect_profile)
         session.commit()
     except Exception, e:
+        session.rollback()
         print (e, "111")
 
-def downloads(campaign, api):
+def downloads(session, campaign, api):
     created_user_count = 0
     counter = 0
     if not campaign.next_items:
@@ -98,9 +102,10 @@ def downloads(campaign, api):
     return True
 
 def update_likes(campaign_id, api):
+    session = Session()
     campaign = session.query(Campaign).get(campaign_id)
     user = session.query(User).get(campaign.user.id)
-    downloaded_results = downloads(campaign, api)
+    downloaded_results = downloads(session, campaign, api)
     prospects = (prospect.id for prospect \
             in ProspectProfile.get_unliked_requests(session, campaign.id, 60))
     ig = InstagramBot(

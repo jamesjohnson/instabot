@@ -173,10 +173,11 @@ def campaign(campaign_id):
     campaign = session.query(Campaign).get(campaign_id)
     scheduler = get_scheduler()
     job = update_likes.AsyncResult(campaign.job_id)
-    state = job.state
-    print state
-    if state == 'SUCCESS' or state == 'FAILURE' or state == 'REVOKED':
-        job = None
+    if job:
+        state = job.state
+        print state
+        if state == 'SUCCESS' or state == 'FAILURE' or state == 'REVOKED':
+            job = None
     if campaign.comment:
         template = "comments/campaign.html"
     else:

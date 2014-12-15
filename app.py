@@ -197,6 +197,8 @@ def turn_on(campaign_id):
     print state
     if state and state != 'FAILURE' and state != 'SUCCESS' and state !='REVOKED':
         update_likes.AsyncResult(job.id).revoke(terminate=True)
+        campaign.job_id=None
+        session.commit()
     else:
         api = instagram.client.InstagramAPI(access_token=campaign.user.access_token)#,
         job = update_likes.delay(campaign_id, api)

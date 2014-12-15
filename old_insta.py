@@ -77,9 +77,9 @@ class InstagramBot(object):
             prospect = session.query(ProspectProfile).get(prospect_id)
             prospect.done = True
             session.commit()
-            links = self._find_links(prospect.prospect.username)
-            if len(links) > 1:
-                try:
+            try:
+                links = self._find_links(prospect.prospect.username)
+                if len(links) > 1:
                     link = links[0]
                     link.click()
                     time.sleep(5)
@@ -106,9 +106,9 @@ class InstagramBot(object):
                         print "like failed"
                         time.sleep(60)
                     self._print_time()
-                except Exception, e:
-                    self.failed += 1
-                    print e, prospect, prospect_id
+            except Exception, e:
+                self.failed += 1
+                print e, prospect, prospect_id
         self.driver.quit()
         self.display.popen.kill()
         return True

@@ -22,7 +22,7 @@ from old_insta import InstagramBot
 from settings import INSTAGRAM_KEY, INSTAGRAM_SECRET, INSTAGRAM_REDIRECT
 
 
-redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379")
+redis_url = os.environ.get("REDIS_URL", "redis://ec2-works.nazo6k.0001.use1.cache.amazonaws.com:6379")
 app = Celery('tasks', broker=redis_url, backend=redis_url)
 
 logger = logging.getLogger('instagram')

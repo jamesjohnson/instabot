@@ -22,7 +22,7 @@ from old_insta import InstagramBot
 from settings import INSTAGRAM_KEY, INSTAGRAM_SECRET, INSTAGRAM_REDIRECT
 
 
-redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379")
+redis_url = os.environ.get("REDIS_URL", "redis://ec2-works.nazo6k.0001.use1.cache.amazonaws.com:6379")
 app = Celery('tasks', broker=redis_url, backend=redis_url)
 
 logger = logging.getLogger('instagram')
@@ -104,7 +104,7 @@ def update_likes(campaign_id, api):
     session = Session()
     campaign = session.query(Campaign).get(campaign_id)
     user = session.query(User).get(campaign.user.id)
-    #downloaded_results = downloads(session, campaign, api)
+    downloaded_results = downloads(session, campaign, api)
     prospects = (prospect.id for prospect \
             in ProspectProfile.get_unliked_requests(session, campaign.id, 50))
     ig = InstagramBot(

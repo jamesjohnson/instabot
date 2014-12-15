@@ -204,6 +204,7 @@ def turn_on(campaign_id):
     else:
         api = instagram.client.InstagramAPI(access_token=campaign.user.access_token)#,
         job = update_likes.delay(campaign_id, api)
+	print job
         campaign.job_id=job.id
         print "Job ID: {}".format(job.id)
         session.commit()

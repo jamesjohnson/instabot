@@ -40,7 +40,7 @@ def create_user(session, user, campaign):
                     instagram_id=user.id,
                     )
             session.add(prospect)
-            session.commit()
+            session.flush()
         prospect_profile = ProspectProfile(
                 campaign_id=campaign.id,
                 prospect_id=prospect.id,

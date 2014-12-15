@@ -8,12 +8,15 @@ from flask import redirect, url_for
 from flask.ext.login import login_user, LoginManager, logout_user, current_user, fresh_login_required
 from werkzeug.debug import DebuggedApplication
 
+from celery.task.control import revoke
+
 from models import session, User, Campaign, Prospect, ProspectProfile,\
 ProspectComment
-from utils import update_and_download, get_scheduler, update_comments
+from tasks import update_likes, get_scheduler, update_comments
 from settings import INSTAGRAM_KEY, INSTAGRAM_SECRET, INSTAGRAM_REDIRECT
 
 import instagram
+
 app = Flask(__name__)
 app.secret_key = 'why would I tell you my secret key?'
 app.debug = True
@@ -169,7 +172,11 @@ def password():
 def campaign(campaign_id):
     campaign = session.query(Campaign).get(campaign_id)
     scheduler = get_scheduler()
-    job = scheduler.get_job(campaign.job_id)
+    job = update_likes.AsyncResult(campaign.job_id)
+    state = job.state
+    print state
+    if state == 'SUCCESS' or state == 'FAILURE' or state == 'REVOKED':
+        job = None
     if campaign.comment:
         template = "comments/campaign.html"
     else:
@@ -180,7 +187,22 @@ def campaign(campaign_id):
 def turn_on(campaign_id):
     print "updated"
     campaign = session.query(Campaign).get(campaign_id)
-    update_and_download(campaign.id)
+    scheduler = get_scheduler()
+    job = update_likes.AsyncResult(campaign.job_id)
+    if job:
+        state = job.state
+    else:
+        state = None
+    print state
+    if state and state != 'FAILURE' and state != 'SUCCESS' and state !='REVOKED':
+        update_likes.AsyncResult(job.id).revoke(terminate=True)
+    else:
+        api = instagram.client.InstagramAPI(access_token=campaign.user.access_token)#,
+        job = update_likes.delay(campaign_id, api)
+        campaign.job_id=job.id
+        print "Job ID: {}".format(job.id)
+        session.commit()
+
     return redirect(url_for("campaign", campaign_id=campaign.id))
 
 

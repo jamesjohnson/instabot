@@ -110,7 +110,7 @@ class InstagramBot(object):
                     self.failed += 1
                     print e, prospect, prospect_id
         self.driver.quit()
-        self.display.close()
+        self.display.popen.kill()
         return True
 
     def comment(self, text):
@@ -139,9 +139,9 @@ class InstagramBot(object):
                     self.failed += 1
                     print e
         self.driver.quit()
-        self.display.close()
+        self.display.popen.kill()
+	print self.successful_prospects, "old_insta 142"
         return self.successful_prospects
-
 
 def run(username, password):
     campaign = session.query(Campaign).first()

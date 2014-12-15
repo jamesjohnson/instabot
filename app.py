@@ -172,12 +172,16 @@ def password():
 def campaign(campaign_id):
     campaign = session.query(Campaign).get(campaign_id)
     scheduler = get_scheduler()
-    job = update_likes.AsyncResult(campaign.job_id)
-    if job:
-        state = job.state
-        print state
-        if state == 'SUCCESS' or state == 'FAILURE' or state == 'REVOKED':
-            job = None
+    job_id = campaign.job_id
+    if job_id:
+        job = update_likes.AsyncResult(job_id)
+        if job:
+            state = job.state
+            print state
+            if state == 'SUCCESS' or state == 'FAILURE' or state == 'REVOKED':
+                job = None
+    else:
+        job = None
     if campaign.comment:
         template = "comments/campaign.html"
     else:
@@ -190,15 +194,13 @@ def turn_on(campaign_id):
     campaign = session.query(Campaign).get(campaign_id)
     scheduler = get_scheduler()
     job = update_likes.AsyncResult(campaign.job_id)
-    if job:
-        state = job.state
-    else:
-        state = None
-    print state
-    if state and state != 'FAILURE' and state != 'SUCCESS' and state !='REVOKED':
-        update_likes.AsyncResult(job.id).revoke(terminate=True)
+    if request.args.get("exists"):
         campaign.job_id=None
         session.commit()
+        try:
+            update_likes.AsyncResult(job.id).revoke()
+        except:
+            pass
     else:
         api = instagram.client.InstagramAPI(access_token=campaign.user.access_token)#,
         job = update_likes.delay(campaign_id, api)

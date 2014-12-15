@@ -106,18 +106,22 @@ def update_likes(campaign_id, api):
     user = session.query(User).get(campaign.user.id)
     #downloaded_results = downloads(session, campaign, api)
     prospects = (prospect.id for prospect \
-            in ProspectProfile.get_unliked_requests(session, campaign.id, 1))
+            in ProspectProfile.get_unliked_requests(session, campaign.id, 50))
     ig = InstagramBot(
             username=user.username,
             password=user.password,
             prospects=prospects)
     result = ig.like()
     campaign.generate_stats(session, total_likes=ig.completed)
-    result = update_likes.apply_async(countdown=100, args=(campaign.id, api,))
-    print "old", campaign.job_id
-    campaign.job_id=result.id
-    session.commit()
-    print "new", campaign.job_id
+    campaign = session.query(Campaign).get(campaign_id)
+    if campaign.job_id:
+        result = update_likes.apply_async(countdown=1000, args=(campaign.id, api,))
+        print "old", campaign.job_id
+        campaign.job_id=result.id
+        session.commit()
+        print "new", campaign.job_id
+    else:
+        print "no longer doing this"
     return True
 
 def update_comments(campaign_id, api):

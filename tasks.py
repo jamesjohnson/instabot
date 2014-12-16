@@ -124,6 +124,7 @@ def update_likes(campaign_id, api):
         print "no longer doing this"
     return True
 
+@app.task
 def update_comments(campaign_id, api):
     logging.basicConfig()
     session = Session()

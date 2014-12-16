@@ -179,3 +179,25 @@ def update_and_download(campaign_id):
                                         #client_secret=INSTAGRAM_SECRET)
     return start_like_scheduler(campaign, api)
 
+def find_media(prospect, comment_text):
+    media = api.user_recent_media(prospect.prospect.instagram_id)
+    for image in media:
+        comments = api.media_comments(image.id)
+        for comment in comments:
+            print comment.text
+            if comment.text == comment_text:
+                return image.id
+
+def add_comments(campaign_id):
+    session = Session()
+    campaign = global_session.query(Campaign).get(campaign_id)
+    api = instagram.client.InstagramAPI(access_token=campaign.user.access_token)
+    for prospect in campaign.prospect_profiles:
+        media_id = find_media(prospect, campaign.comment)
+        prospect_comment = ProspectComment(
+                media_id=media_id,
+                prospect_profile=prospect
+                )
+        session.add(prospect_comment)
+        session.commit()
+

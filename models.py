@@ -184,7 +184,6 @@ class ProspectComment(Base):
     def check_reply(self, session, api):
         media_id = self.media_id
         username = self.prospect_profile.campaign.user.username
-        api = instagram.client.InstagramAPI(access_token=user.access_token)
         comments = api.media_comments(media_id)
         for comment in comments:
             if username in comment.text:
@@ -195,10 +194,9 @@ class ProspectComment(Base):
         return False
 
     def __repr__(self):
-        return '<ProspectProfile id={0} done={1} username={2}>'.format(
+        return '<ProspectComment id={0} username={1}>'.format(
                 self.id,
-                self.d,
-                self.username
+                self.prospect_profile
                 )
 
 
@@ -224,8 +222,6 @@ class Statistic(Base):
             return self.total_followers - statistic.total_followers
         except:
             return 0
-
-						
 
     def __repr__(self):
         return '<Statistic id={0} date={1} campaign={2}>'.format(

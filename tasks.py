@@ -126,6 +126,7 @@ def update_likes(campaign_id, api):
 
 def update_comments(campaign_id, api):
     logging.basicConfig()
+    session = Session()
     campaign = session.query(Campaign).get(campaign_id)
     user = session.query(User).get(campaign.user.id)
     prospects = (prospect.id for prospect in \

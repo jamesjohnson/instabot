@@ -139,6 +139,7 @@ def update_comments(campaign_id, api):
     results = ig.comment(text=campaign.comment)
     print results, "utils 125"
     for prospect in results:
+        prospect = session.query(ProspectProfile).get(prospect.id)
         media = user.insta_client.user_recent_media()[0][0]
         prospect_comment=ProspectComment(
                 prospect_profile=prospect,

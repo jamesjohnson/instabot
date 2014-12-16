@@ -147,7 +147,7 @@ def comments():
         soon = datetime.datetime.now() + datetime.timedelta(minutes=1)
         logging.basicConfig()
         scheduler = get_scheduler()
-        job = update_comments.delay(campaign_id, api)
+        job = update_comments.delay(campaign.id, api)
         campaign.job_id=job.id
         session.commit()
         campaigns = session.query(Campaign).filter_by(user=current_user, \

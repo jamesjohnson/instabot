@@ -194,10 +194,9 @@ class ProspectComment(Base):
         return False
 
     def __repr__(self):
-        return '<ProspectProfile id={0} done={1} username={2}>'.format(
+        return '<ProspectComment id={0} username={1}>'.format(
                 self.id,
-                self.d,
-                self.username
+                self.prospect_profile
                 )
 
 
@@ -216,15 +215,13 @@ class Statistic(Base):
     def new_followers(self):
         today = datetime.datetime.today()
         yesterday = today - datetime.timedelta(days=1)
-	try:
+        try:
             statistic = session.query(Statistic).filter_by(
-					date=yesterday.date(),
+                    date=yesterday.date(),
                                         campaign=self.campaign).first()
             return self.total_followers - statistic.total_followers
         except:
             return 0
-
-
 
     def __repr__(self):
         return '<Statistic id={0} date={1} campaign={2}>'.format(

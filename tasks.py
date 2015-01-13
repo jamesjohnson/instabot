@@ -104,7 +104,7 @@ def update_likes(campaign_id, api):
     session = Session()
     campaign = session.query(Campaign).get(campaign_id)
     user = session.query(User).get(campaign.user.id)
-    downloaded_results = downloads(session, campaign, api)
+    #downloaded_results = downloads(session, campaign, api)
     prospects = (prospect.id for prospect \
             in ProspectProfile.get_unliked_requests(session, campaign.id, 50))
     ig = InstagramBot(
@@ -180,7 +180,9 @@ def update_and_download(campaign_id):
     return start_like_scheduler(campaign, api)
 
 def find_media(prospect, comment_text):
-    media = api.user_recent_media(prospect.prospect.instagram_id)
+    media, _ = api.user_recent_media(prospect.prospect.instagram_id)
+    import pdb
+    pdb.set_trace()
     for image in media:
         comments = api.media_comments(image.id)
         for comment in comments:
@@ -190,7 +192,7 @@ def find_media(prospect, comment_text):
 
 def add_comments(campaign_id):
     session = Session()
-    campaign = global_session.query(Campaign).get(campaign_id)
+    campaign = session.query(Campaign).get(campaign_id)
     api = instagram.client.InstagramAPI(access_token=campaign.user.access_token)
     for prospect in campaign.prospect_profiles:
         media_id = find_media(prospect, campaign.comment)
@@ -200,4 +202,5 @@ def add_comments(campaign_id):
                 )
         session.add(prospect_comment)
         session.commit()
+        print prospect_comment
 

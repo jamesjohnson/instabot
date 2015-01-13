@@ -53,7 +53,8 @@ class InstagramBot(object):
         self.driver.get("https://instagram.com/")
         time.sleep(2)
         self.driver.get("https://instagram.com/%s" % username)
-        return self.driver.find_elements_by_xpath("//ul[@class='photo-feed']/li/div/a")
+        time.sleep(2)
+        return self.driver.find_elements_by_xpath("//a[@class='pgmiImageLink']")
 
     def _print_time(self):
         current_time = datetime.timedelta(seconds=time.time() - \
@@ -100,7 +101,7 @@ class InstagramBot(object):
                                 media_id=media_id)
                         session.add(user_like)
                         session.commit()
-                        time.sleep(20)
+                        time.sleep(22)
                     else:
                         self.failed += 1
                         print "like failed"

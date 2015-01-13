@@ -104,7 +104,7 @@ def update_likes(campaign_id, api):
     session = Session()
     campaign = session.query(Campaign).get(campaign_id)
     user = session.query(User).get(campaign.user.id)
-    downloaded_results = downloads(session, campaign, api)
+    #downloaded_results = downloads(session, campaign, api)
     prospects = (prospect.id for prospect \
             in ProspectProfile.get_unliked_requests(session, campaign.id, 50))
     ig = InstagramBot(
@@ -124,8 +124,10 @@ def update_likes(campaign_id, api):
         print "no longer doing this"
     return True
 
+@app.task
 def update_comments(campaign_id, api):
     logging.basicConfig()
+    session = Session()
     campaign = session.query(Campaign).get(campaign_id)
     user = session.query(User).get(campaign.user.id)
     prospects = (prospect.id for prospect in \
@@ -137,6 +139,7 @@ def update_comments(campaign_id, api):
     results = ig.comment(text=campaign.comment)
     print results, "utils 125"
     for prospect in results:
+        prospect = session.query(ProspectProfile).get(prospect.id)
         media = user.insta_client.user_recent_media()[0][0]
         prospect_comment=ProspectComment(
                 prospect_profile=prospect,
@@ -176,3 +179,34 @@ def update_and_download(campaign_id):
                                         #client_secret=INSTAGRAM_SECRET)
     return start_like_scheduler(campaign, api)
 
+def find_media(api, prospect, comment_text):
+    print "prospect:", prospect.prospect.username
+    print "========"
+    try:
+        media, _ = api.user_recent_media(user_id=prospect.prospect.instagram_id)
+        for image in media:
+            print "image id", image.id
+            comments = api.media_comments(image.id)
+            for comment in comments:
+                print comment.text
+                if comment.text == comment_text:
+                    return image.id
+    except:
+        pass
+    print "none"
+    return None
+
+def add_comments(campaign_id):
+    session = Session()
+    campaign = session.query(Campaign).get(campaign_id)
+    api = instagram.client.InstagramAPI(access_token=campaign.user.access_token)
+    for prospect in campaign.prospect_profiles:
+        print prospect.prospect.instagram_id
+        media_id = find_media(api, prospect, campaign.comment)
+        if media_id:
+            prospect_comment = ProspectComment(
+                    media_id=media_id,
+                    prospect_profile=prospect
+                    )
+            session.add(prospect_comment)
+            session.commit()

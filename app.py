@@ -190,7 +190,6 @@ def campaign(campaign_id):
 def turn_on(campaign_id):
     print "updated"
     campaign = session.query(Campaign).get(campaign_id)
-    scheduler = get_scheduler()
     job = update_likes.AsyncResult(campaign.job_id)
     if request.args.get("exists"):
         campaign.job_id=None
@@ -202,7 +201,7 @@ def turn_on(campaign_id):
     else:
         api = instagram.client.InstagramAPI(access_token=campaign.user.access_token)#,
         job = update_likes.delay(campaign_id, api)
-	print job
+        print job
         campaign.job_id=job.id
         print "Job ID: {}".format(job.id)
         session.commit()

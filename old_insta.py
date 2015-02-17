@@ -14,6 +14,9 @@ from pyvirtualdisplay import Display
 
 from models import Session, Prospect, ProspectProfile, UserLike
 
+SENTRY_DNS = "https://71d9ea2ad3784e1bbd276ac91097a01b:b0efbe285d4444b4a5b544b3639a1aab@app.getsentry.com/38083"
+client = Client(SENTRY_DNS)
+
 session = Session()
 
 class InstagramBot(object):
@@ -109,6 +112,7 @@ class InstagramBot(object):
                     self._print_time()
             except Exception, e:
                 self.failed += 1
+                client.captureException()
                 print e, prospect, prospect_id
         self.driver.quit()
         self.display.popen.kill()
@@ -138,6 +142,7 @@ class InstagramBot(object):
                     time.sleep(15)
                 except Exception, e:
                     self.failed += 1
+                    client.captureException()
                     print e
         self.driver.quit()
         self.display.popen.kill()

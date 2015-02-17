@@ -21,13 +21,22 @@ from old_insta import InstagramBot
 
 from settings import INSTAGRAM_KEY, INSTAGRAM_SECRET, INSTAGRAM_REDIRECT
 
+from raven import Client
+from raven.contrib.celery import register_signal
 
 redis_url = os.environ.get("REDIS_URL", "redis://ec2-works.nazo6k.0001.use1.cache.amazonaws.com:6379")
 app = Celery('tasks', broker=redis_url, backend=redis_url)
 
+
+SENTRY_DNS = "https://71d9ea2ad3784e1bbd276ac91097a01b:b0efbe285d4444b4a5b544b3639a1aab@app.getsentry.com/38083"
+client = Client(SENTRY_DNS)
+register_signal(client)
+
 logger = logging.getLogger('instagram')
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.DEBUG)
+
+
 
 
 def create_user(session, user, campaign):
@@ -68,6 +77,7 @@ def downloads(session, campaign, api):
                     create_user(session, user, campaign)
                     created_user_count += 1
             except Exception, e:
+                client.captureException()
                 print (e, "121")
     else:
         next_items=campaign.next_items
@@ -85,6 +95,7 @@ def downloads(session, campaign, api):
                     create_user(session, user, campaign)
                     created_user_count += 1
             except Exception, e:
+                client.captureException()
                 print (e, "131")
     campaign.next_items = next_items
     session.commit()
@@ -104,7 +115,7 @@ def update_likes(campaign_id, api):
     session = Session()
     campaign = session.query(Campaign).get(campaign_id)
     user = session.query(User).get(campaign.user.id)
-    #downloaded_results = downloads(session, campaign, api)
+    downloaded_results = downloads(session, campaign, api)
     prospects = (prospect.id for prospect \
             in ProspectProfile.get_unliked_requests(session, campaign.id, 50))
     ig = InstagramBot(
@@ -123,6 +134,12 @@ def update_likes(campaign_id, api):
     else:
         print "no longer doing this"
     return True
+
+@app.task
+def launch_instance(campaign_id, username):
+    conn = boto.ec2.connect_to_region('us-east-1',
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
 
 @app.task
 def update_comments(campaign_id, api):

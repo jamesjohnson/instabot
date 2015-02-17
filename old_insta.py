@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
 from pyvirtualdisplay import Display
+from raven import Client
 
 
 from models import Session, Prospect, ProspectProfile, UserLike

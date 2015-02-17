@@ -3,6 +3,8 @@ import os
 import datetime
 import logging
 import time
+import subprocess
+import signal
 
 import urlparse
 import requests
@@ -110,8 +112,21 @@ def update_likes_q(campaign_id, api):
     return True
 
 
+def kill_firefox_and_xvfb():
+    p = subprocess.Popen(['ps', '-A'], stdout=subprocess.PIPE)
+    out, err = p.communicate()
+    for i, line in enumerate(out.splitlines()):
+        if i > 0:
+            if 'firefox' in line or 'xvfb' in line.lower():
+                print line
+                pid = int(line.split(None, 1)[0])
+                os.kill(pid, signal.SIGKILL)
+                print "killed"
+
+
 @app.task
 def update_likes(campaign_id, api):
+    kill_firefox_and_xvfb()
     session = Session()
     campaign = session.query(Campaign).get(campaign_id)
     user = session.query(User).get(campaign.user.id)

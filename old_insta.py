@@ -40,8 +40,6 @@ class InstagramBot(object):
     def _login(self):
         self.driver.get("https://instagram.com/accounts/login")
         WebDriverWait(self.driver, 10).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "div.liSpinnerLayer")))
-        my_iframe = self.driver.find_element_by_css_selector("iframe.hiFrame")
-        self.driver.switch_to_frame(my_iframe)
         username = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "input[name='username']")))
         password = WebDriverWait(self.driver,\
                 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR,\
@@ -74,21 +72,19 @@ class InstagramBot(object):
                 .get('userMedia')[0].get('id')
 
     def like(self):
+        liked_media = {}
         self.start_time = time.time()
         if not self.is_logged_in:
             self._login()
             time.sleep(10)
-        for prospect_id in self.prospects:
-            prospect = session.query(ProspectProfile).get(prospect_id)
-            prospect.done = True
-            session.commit()
+        for prospect in self.prospects:
             try:
-                links = self._find_links(prospect.prospect.username)
+                links = self._find_links(prospect)
                 if len(links) > 1:
                     link = links[0]
                     link.click()
                     time.sleep(5)
-                    element_to_like = self.driver.find_element_by_xpath("//a[@class='LikeButton IconButton Button bbBaseButton']")
+                    element_to_like = self.driver.find_element_by_xpath("//a[contains(@class, 'LikeButton')]")
                     element_to_like.click()
                     time.sleep(2)
                     if "ButtonActive" in element_to_like.get_attribute("class"):
@@ -99,12 +95,7 @@ class InstagramBot(object):
                         except:
                             media_id = None
                         print media_id
-                        user = prospect.campaign.user
-                        user_like = UserLike(prospect=prospect.prospect,
-                                user=user,
-                                media_id=media_id)
-                        session.add(user_like)
-                        session.commit()
+                        liked_media[prospect] = media_id
                         time.sleep(22)
                     else:
                         self.failed += 1
@@ -117,7 +108,7 @@ class InstagramBot(object):
                 print e, prospect, prospect_id
         self.driver.quit()
         self.display.popen.kill()
-        return True
+        return liked_media
 
     def comment(self, text):
         self.start_time = time.time()
@@ -147,22 +138,21 @@ class InstagramBot(object):
                     print e
         self.driver.quit()
         self.display.popen.kill()
-	print self.successful_prospects, "old_insta 142"
+        print self.successful_prospects, "old_insta 142"
         return self.successful_prospects
 
-def run(username, password):
-    campaign = session.query(Campaign).first()
-    prospects = Prospect.get_unliked_requests(session, campaign_id, 100)
+def run(username, password, prospects):
     ig = InstagramBot(
             username=username,
             password=password,
-            prospects=prospects)
+            prospects=prospects.split(","))
     ig.like()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("username")
     parser.add_argument("password")
+    parser.add_argument("prospects")
     args = parser.parse_args()
-    run(args.username, args.password)
+    run(args.username, args.password, args.prospects)
 

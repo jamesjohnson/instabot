@@ -17,7 +17,7 @@ from redis import Redis
 from scheduler import get_scheduler
 
 from models import Session, User, Campaign, Prospect, ProspectProfile, \
-ProspectComment
+ProspectComment, UserLike
 from models import session as global_session
 from old_insta import InstagramBot
 
@@ -131,13 +131,23 @@ def update_likes(campaign_id, api):
     campaign = session.query(Campaign).get(campaign_id)
     user = session.query(User).get(campaign.user.id)
     downloaded_results = downloads(session, campaign, api)
-    prospects = (prospect.id for prospect \
-            in ProspectProfile.get_unliked_requests(session, campaign.id, 50))
+    prospect_array = []
+    prospects = ProspectProfile.get_unliked_requests(session, campaign.id, 50)
+    for prospect in prospects:
+        prospect.done = True
+        session.commit()
+        prospect_array.append(prospect.id)
     ig = InstagramBot(
             username=user.username,
             password=user.password,
-            prospects=prospects)
+            prospects=prospect_array)
     result = ig.like()
+    for k, v in result.iteritems():
+        prospect = session.query(Prospect).get(int(k))
+        user_like = UserLike(user=user, prospect=prospect, media_id=v)
+        session.add(user_like)
+        session.commit()
+
     campaign.generate_stats(session, total_likes=ig.completed)
     campaign = session.query(Campaign).get(campaign_id)
     if campaign.job_id:

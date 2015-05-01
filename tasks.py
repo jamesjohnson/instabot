@@ -136,7 +136,7 @@ def update_likes(campaign_id, api):
     for prospect in prospects:
         prospect.done = True
         session.commit()
-        prospect_array.append(prospect.id)
+        prospect_array.append(prospect.username)
     ig = InstagramBot(
             username=user.username,
             password=user.password,

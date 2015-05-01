@@ -78,7 +78,7 @@ class InstagramBot(object):
             self._login()
             time.sleep(10)
         for prospect in self.prospects:
-            print pros
+            print prospect
             try:
                 links = self._find_links(prospect)
                 if len(links) > 1:

@@ -136,17 +136,18 @@ def update_likes(campaign_id, api):
     for prospect in prospects:
         prospect.done = True
         session.commit()
-        prospect_array.append(prospect.username)
+        prospect_array.append(prospect.prospect.username)
     ig = InstagramBot(
             username=user.username,
             password=user.password,
             prospects=prospect_array)
     result = ig.like()
     for k, v in result.iteritems():
-        prospect = session.query(Prospect).get(int(k))
-        user_like = UserLike(user=user, prospect=prospect, media_id=v)
-        session.add(user_like)
-        session.commit()
+        prospect = session.query(Prospect).filter_by(username=k).first()
+	if prospect:
+	    user_like = UserLike(user=user, prospect=prospect, media_id=v)
+	    session.add(user_like)
+	    session.commit()
 
     campaign.generate_stats(session, total_likes=ig.completed)
     campaign = session.query(Campaign).get(campaign_id)

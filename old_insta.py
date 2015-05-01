@@ -78,6 +78,7 @@ class InstagramBot(object):
             self._login()
             time.sleep(10)
         for prospect in self.prospects:
+	    print prospect
             try:
                 links = self._find_links(prospect)
                 if len(links) > 1:
@@ -86,7 +87,7 @@ class InstagramBot(object):
                     time.sleep(5)
                     element_to_like = self.driver.find_element_by_xpath("//a[contains(@class, 'LikeButton')]")
                     element_to_like.click()
-                    time.sleep(2)
+                    time.sleep(6)
                     if "ButtonActive" in element_to_like.get_attribute("class"):
                         self.driver.find_element_by_xpath("//i[@class='igDialogClose']").click()
                         self.completed += 1

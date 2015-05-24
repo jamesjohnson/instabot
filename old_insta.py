@@ -38,6 +38,7 @@ class InstagramBot(object):
         self.successful_prospects = []
 
     def _login(self):
+	print "logging in"
         self.driver.get("https://instagram.com/accounts/login")
         WebDriverWait(self.driver, 10).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "div.liSpinnerLayer")))
         username = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "input[name='username']")))
@@ -47,14 +48,15 @@ class InstagramBot(object):
         username.send_keys(self.username)
         password.send_keys(self.password)
         self.driver.find_elements_by_class_name("lfSubmit")[0].click()
-        self.driver.implicitly_wait(5)
-        import pdb
-        pdb.set_trace()
+	time.sleep(10)
         try:
             self.driver.get("https://instagram.com")
-            self.driver.implicitly_wait(5)
+	    time.sleep(10)
             self.driver.find_element_by_class_name('home-phones')
+	    print "Not logged in"
+	    return False
         except:
+	    print "logged in"
             self.is_logged_in = True
         return True
 
@@ -82,11 +84,11 @@ class InstagramBot(object):
         liked_media = {}
         self.start_time = time.time()
         if not self.is_logged_in:
-            self._login()
-            time.sleep(10)
-        if not self.is_logged_in:
+            logged_in = self._login()
+        if not logged_in:
             print "Not logged In"
-            return False
+            return liked_media
+        time.sleep(10)
         for prospect in self.prospects:
             print prospect
             try:

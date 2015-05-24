@@ -48,8 +48,6 @@ class InstagramBot(object):
         password.send_keys(self.password)
         self.driver.find_elements_by_class_name("lfSubmit")[0].click()
         self.driver.implicitly_wait(5)
-        import pdb
-        pdb.set_trace()
         try:
             self.driver.get("https://instagram.com")
             self.driver.implicitly_wait(5)

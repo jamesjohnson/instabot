@@ -189,8 +189,6 @@ def campaign(campaign_id):
 @app.route("/update/<int:campaign_id>")
 def turn_on(campaign_id):
     print "updated"
-    import pdb
-    pdb.set_trace()
     campaign = session.query(Campaign).get(campaign_id)
     try:
         job = update_likes.AsyncResult(campaign.job_id)

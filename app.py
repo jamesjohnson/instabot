@@ -190,8 +190,11 @@ def campaign(campaign_id):
 def turn_on(campaign_id):
     print "updated"
     campaign = session.query(Campaign).get(campaign_id)
-    job = update_likes.AsyncResult(campaign.job_id)
-    if request.args.get("exists"):
+    try:
+        job = update_likes.AsyncResult(campaign.job_id)
+    except:
+        job = None
+    if job:
         campaign.job_id=None
         session.commit()
         try:

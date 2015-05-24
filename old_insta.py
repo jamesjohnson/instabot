@@ -48,7 +48,14 @@ class InstagramBot(object):
         password.send_keys(self.password)
         self.driver.find_elements_by_class_name("lfSubmit")[0].click()
         self.driver.implicitly_wait(5)
-        self.is_logged_in = True
+        import pdb
+        pdb.set_trace()
+        try:
+            self.driver.get("https://instagram.com")
+            self.driver.implicitly_wait(5)
+            self.driver.find_element_by_class_name('home-phones')
+        except:
+            self.is_logged_in = True
         return True
 
     def _find_links(self, username):
@@ -77,6 +84,9 @@ class InstagramBot(object):
         if not self.is_logged_in:
             self._login()
             time.sleep(10)
+        if not self.is_logged_in:
+            print "Not logged In"
+            return False
         for prospect in self.prospects:
             print prospect
             try:
@@ -84,14 +94,14 @@ class InstagramBot(object):
                 if len(links) > 1:
                     link = links[0]
                     link.click()
-                    time.sleep(5)
+                    time.sleep(10)
                     element_to_like = self.driver.find_element_by_xpath("//a[contains(@class, 'LikeButton')]")
                     element_to_like.click()
-                    links = self._find_links(prospect)
-                    link = links[0]
-                    link.click()
-                    element_to_like = self.driver.find_element_by_xpath("//a[contains(@class, 'LikeButton')]")
-                    time.sleep(2)
+                    time.sleep(5)
+                    if not "ButtonActive" in element_to_like.get_attribute("class"):
+                        element_to_like = self.driver.find_element_by_xpath("//a[contains(@class, 'LikeButton')]")
+                        element_to_like.click()
+                        time.sleep(5)
                     if "ButtonActive" in element_to_like.get_attribute("class"):
                         self.driver.find_element_by_xpath("//i[@class='igDialogClose']").click()
                         self.completed += 1

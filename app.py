@@ -189,12 +189,14 @@ def campaign(campaign_id):
 @app.route("/update/<int:campaign_id>")
 def turn_on(campaign_id):
     print "updated"
+    import pdb
+    pdb.set_trace()
     campaign = session.query(Campaign).get(campaign_id)
     try:
         job = update_likes.AsyncResult(campaign.job_id)
     except:
         job = None
-    if job:
+    if job.id:
         campaign.job_id=None
         session.commit()
         try:
@@ -214,4 +216,4 @@ def turn_on(campaign_id):
 
 if __name__ == "__main__":
     app.debug = True
-    app.run()
+    app.run(host='0.0.0.0', port=8000)
